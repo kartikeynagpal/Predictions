@@ -4,29 +4,23 @@ from filterpy.kalman import KalmanFilter
 import os
 import glob
 
-class DataProcessor:
-    def __init__(self, pred_window=1, dt=0.1):
+class KalmanCSVProcessor:
+    def __init__(self, pred_window=1, dt=0.1, output_dir='processed_data'):  
+        self.kf = None
         self.pred_window = pred_window
         self.dt = dt
-
-    def process_file(self, filepath):
-        raise NotImplementedError("This method should be overridden by subclasses")
-
-class KalmanCSVProcessor(DataProcessor):
-    def __init__(self, output_dir='processed_data', *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.kf = None
         self.output_dir = output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)  # Ensure the output directory exists
 
     def setup_kalman_filter(self, dim_x, dim_z):
         self.kf = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
         self.kf.F = np.eye(dim_x)
         for i in range(dim_x // 2):
             self.kf.F[i, i + dim_x // 2] = self.dt
+        self.kf.H = np.eye(dim_z, dim_x)  # Measurement function
         self.kf.P *= 1000.
-        self.kf.R = np.eye(dim_z) * 5
-        self.kf.Q = np.eye(dim_x) * 0.1
+        self.kf.R = np.eye(dim_z) * 5  # Measurement uncertainty
+        self.kf.Q = np.eye(dim_x) * 0.1  # Process uncertainty
 
     def predict_future_states(self, steps):
         future_states = []
@@ -37,7 +31,7 @@ class KalmanCSVProcessor(DataProcessor):
 
     def process_file(self, filepath):
         data = pd.read_csv(filepath)
-        dim_x = 14 
+        dim_x = 14
         dim_z = 7
 
         self.setup_kalman_filter(dim_x, dim_z)
@@ -47,11 +41,11 @@ class KalmanCSVProcessor(DataProcessor):
             z = np.array([row['PosX'], row['PosY'], row['PosZ'], row['QuatW'], row['QuatX'], row['QuatY'], row['QuatZ']])
             self.kf.predict()
             self.kf.update(z)
-            predictions.append(self.kf.x[:dim_z].tolist())  
+            predictions.append(self.kf.x[:dim_z].tolist())
 
             steps = int(self.pred_window / self.dt)
             future_states = self.predict_future_states(steps)
-            future_predictions.append([fs[:dim_z].tolist() for fs in future_states])  
+            future_predictions.append([fs[:dim_z].tolist() for fs in future_states])
 
         result_df = pd.DataFrame(predictions, columns=['PosX', 'PosY', 'PosZ', 'QuatW', 'QuatX', 'QuatY', 'QuatZ'])
         future_pred_path = os.path.join(self.output_dir, os.path.splitext(os.path.basename(filepath))[0] + '_future_predictions.csv')
