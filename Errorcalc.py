@@ -19,8 +19,8 @@ def calculate_angular_error(q_actual, q_predicted):
     angular_error = np.linalg.norm(euler_angles)
     return angular_error
 
-original_data_dir = 'D:\\Vodafone\\Kalman\\Git\\Prepared data'
-predicted_data_dir = 'D:\\Vodafone\\Kalman\\Git\\reprocessed_data'
+original_data_dir = 'Prepared data'
+predicted_data_dir = 'reprocessed_data'
 
 original_files = glob.glob(os.path.join(original_data_dir, '*.csv'))
 predicted_files = glob.glob(os.path.join(predicted_data_dir, '*_future_predictions.csv'))
