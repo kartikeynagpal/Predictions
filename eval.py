@@ -10,8 +10,7 @@ class KalmanCSVProcessor:
         self.pred_window = pred_window
         self.dt = dt
         self.output_dir = output_dir
-        os.makedirs(self.output_dir, exist_ok=True)  # Ensure the output directory exists
-
+        os.makedirs(self.output_dir, exist_ok=True)  
     def setup_kalman_filter(self, dim_x, dim_z):
         self.kf = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
         self.kf.F = np.eye(dim_x)
@@ -34,8 +33,7 @@ class KalmanCSVProcessor:
             z = np.array([row['PosX'], row['PosY'], row['PosZ'], row['QuatW'], row['QuatX'], row['QuatY'], row['QuatZ']])
             self.kf.predict()
             self.kf.update(z)
-            predictions.append(self.kf.x[:dim_z].tolist())  # Save only the immediate next state
-
+            predictions.append(self.kf.x[:dim_z].tolist())  
         # Save predictions as future predictions
         future_pred_path = os.path.join(self.output_dir, os.path.splitext(os.path.basename(filepath))[0] + '_future_predictions.csv')
         future_result_df = pd.DataFrame(predictions, columns=['Future_PosX', 'Future_PosY', 'Future_PosZ', 'Future_QuatW', 'Future_QuatX', 'Future_QuatY', 'Future_QuatZ'])
@@ -44,8 +42,7 @@ class KalmanCSVProcessor:
 
 def main():
     processor = KalmanCSVProcessor(pred_window=1, dt=0.1)
-    directory_path = 'Prepared data'  # Adjusted for clarity
-
+    directory_path = 'Prepared data'  
     for filepath in glob.glob(os.path.join(directory_path, '*.csv')):
         processor.process_file(filepath)
 
