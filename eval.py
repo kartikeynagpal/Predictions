@@ -44,7 +44,7 @@ class KalmanCSVProcessor:
 
 def main():
     processor = KalmanCSVProcessor(pred_window=1, dt=0.1)
-    directory_path = 'D:\\Vodafone\\Kalman\\Git\\Prepared data'  # Adjusted for clarity
+    directory_path = 'Prepared data'  # Adjusted for clarity
 
     for filepath in glob.glob(os.path.join(directory_path, '*.csv')):
         processor.process_file(filepath)
