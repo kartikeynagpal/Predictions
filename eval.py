@@ -5,7 +5,7 @@ import os
 import glob
 
 class KalmanCSVProcessor:
-    def __init__(self, pred_window=1, dt=0.1, output_dir='reprocessed_data'):
+    def __init__(self, pred_window=1, dt=0.1, output_dir='processed_data'):
         self.kf = None
         self.pred_window = pred_window
         self.dt = dt
